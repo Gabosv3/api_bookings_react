@@ -1,4 +1,6 @@
 import axios from "axios";
+import { defaultAxiosWithToken } from "../utils/http";
+import { useQuery } from "@tanstack/react-query";
 
 //obtenemos el token que se guarda en el sessionstorage
 const token = sessionStorage.getItem('token_bookings')
@@ -18,4 +20,16 @@ const getAccomodations = async () => {
     }
 }
 
-export { getAccomodations }
+//other approach
+const findAlAccomodations = async () => (await defaultAxiosWithToken.get('/accomodations')).data;
+
+const useGetAccomodations = () => {
+    const { data, isLoading, isError, isSuccess, error } = useQuery({
+        queryKey: ['accomodations'],
+        queryFn: () => findAlAccomodations(),
+        refetchOnWindowFocus:false
+    });
+    return { data, isLoading, isError, isSuccess, error };
+}
+
+export { getAccomodations, useGetAccomodations }
