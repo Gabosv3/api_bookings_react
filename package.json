@@ -10,20 +10,24 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "11.13.3",
+    "@emotion/styled": "11.13.0",
+    "@mui/icons-material": "6.1.5",
+    "@mui/material": "6.1.5",
+    "@schedule-x/calendar": "^2.4.1",
+    "@schedule-x/events-service": "^2.4.1",
+    "@schedule-x/react": "^2.4.1",
+    "@schedule-x/theme-default": "^2.4.1",
+    "@toolpad/core": "^0.8.1",
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
+    "invariant": "2.2.4",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.5",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.53.1",
     "react-router-dom": "^6.27.0",
-    "sweetalert2": "^11.14.4",
-    "@toolpad/core": "^0.8.1",
-    "@mui/material": "6.1.5",
-    "@mui/icons-material": "6.1.5",
-    "@emotion/react": "11.13.3",
-    "@emotion/styled": "11.13.0",
-    "invariant": "2.2.4"
+    "sweetalert2": "^11.14.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
