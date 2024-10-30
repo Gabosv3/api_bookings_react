@@ -19,7 +19,7 @@ import BookingsCalendar from './BookingsCalendar';
 import { grey } from '@mui/material/colors';
 
 
-export default function Bookings() {
+export default function VewBookings() {
   const [accomodations, setAccomodations] = useState([]);
   const [bookings, setBookings] = useState([])
   const [isAuthenticated, setIsAuthenticated] = useState(false);
