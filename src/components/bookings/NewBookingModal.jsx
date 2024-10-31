@@ -1,21 +1,24 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import Swal from 'sweetalert2';
+import Spinner from "react-bootstrap/Spinner";
+
 import { useCreateBooking} from "../../services/bookingService";
 import { useGetAccomodations } from "../../services/accomodationServices";
 import { useGetUsers } from "../../services/userService";
 
 const NewBookingModal = ({ isOpen, onClose }) => {
-    //TODO add more validations, handle error response on create, and fix style
     const {data: accommodations, isLoading: isLoadingAccommodation, error:errorAccommodation} = useGetAccomodations();
 
     const {data: users, isLoading: isLoadingUsers, error:errorUsers} = useGetUsers();
-    
-    const { mutate: createBooking } = useCreateBooking();
+
+    const { isPending: isPendingCreate, mutate: createBooking } = useCreateBooking();
     // useForm for handling form validation
     const {
         register,
         handleSubmit,
         formState: { errors },
+        watch,
         reset,
     } = useForm({
         defaultValues: {
@@ -28,14 +31,28 @@ const NewBookingModal = ({ isOpen, onClose }) => {
         }
     });
 
+    //for date validation
+    const checkInDate = watch("check_in_date");
+
     const onSubmit = (data) => {
         createBooking(data, {
             onSuccess: () => {
-                console.log("Form submitted:", data);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Reserva creada',
+                    showConfirmButton: false,
+                    timer: 4000
+                });
                 onClose(); 
             },
             onError: (error) => {
-                console.error("Booking creation failed:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: error?.message,
+                    footer: 'Please try again later',
+                    timer: 4000
+                });
             }
         });
     };
@@ -96,7 +113,10 @@ const NewBookingModal = ({ isOpen, onClose }) => {
                                     id="check_out_date"
                                     type="date"
                                     className="form-control"
-                                    {...register("check_out_date", { required: "Check-out date is required" })}
+                                    {...register("check_out_date", { 
+                                        required: "Check-out date is required", 
+                                        validate: value =>  new Date(value) >= new Date(checkInDate) || 
+                                        "Check-out date must be after or equal check-in date" })}
                                 />
                                 {errors.check_out_date && <p className="text-danger mt-2">{errors.check_out_date.message}</p>}
                             </div>
@@ -107,58 +127,85 @@ const NewBookingModal = ({ isOpen, onClose }) => {
                                     type="number"
                                     step="0.01"
                                     className="form-control"
-                                    {...register("total_amount", { required: "Total amount is required" })}
+                                    {...register("total_amount", { required: "Total amount is required", min: { value: 0.01, message: "Total amount must be greater than 0" } })}
                                 />
                                 {errors.total_amount && <p className="text-danger mt-2">{errors.total_amount.message}</p>}
                             </div>
                             <div className="form-group mb-3">
                                 <label>Usuario *</label>
-                                <select className="form-select"
-                                    id="user_id"
-                                    {...register("user_id", { required: "User selection is required" })}
-                                >
-                                    {isLoadingUsers ? (
-                                        <option>Loading users...</option>
-                                    ) : errorUsers ? (
-                                        <option>Error loading users</option>
-                                    ) : (
-                                        users?.map((user) => (
+                                {isLoadingUsers && (
+                                    <div className="d-flex justify-content-center align-items-center mt-2 mb-2">
+                                        <Spinner animation="border" role="status">
+                                            <span className="visually-hidden">Cargando...</span>
+                                        </Spinner>
+                                    </div>
+                                )}
+                                {errorUsers && (
+                                    <div className="d-flex justify-content-center align-items-center mt-2 mb-2">
+                                        <p className="text-danger">{errorUsers?.message}</p>
+                                    </div>
+                                )}
+                                {users && (
+                                    <select className="form-select"
+                                        id="user_id"
+                                        {...register("user_id", { required: "User selection is required" })}
+                                    >
+                                        {users?.map((user) => (
                                             <option key={user.id} value={user.id}>
                                                 {user.name}
                                             </option>
-                                        ))
-                                    )}
-                                </select>
+                                        ))}
+                                    </select>
+                                )}
                                 {errors.user_id && <p className="text-danger mt-2">{errors.user_id.message}</p>}
                             </div>
                             <div className="form-group mb-3">
                                 <label>Alojamiento *</label>
-                                <select className="form-select" 
-                                    id="accomodation_id"
-                                    {...register("accomodation_id", { required: "Accommodation selection is required" })}
-                                >
-                                    {isLoadingAccommodation ? (
-                                        <option>Loading accommodations...</option>
-                                    ) : errorAccommodation ? (
-                                        <option>Error loading accommodations</option>
-                                    ) : (
-                                        accommodations?.map((acc) => (
+                                {isLoadingAccommodation && (
+                                    <div className="d-flex justify-content-center align-items-center mt-2 mb-2">
+                                        <Spinner animation="border" role="status">
+                                            <span className="visually-hidden">Cargando...</span>
+                                        </Spinner>
+                                    </div>
+                                )}
+                                {errorAccommodation && (
+                                    <div className="d-flex justify-content-center align-items-center mt-2 mb-2">
+                                        <p className="text-danger">{errorAccommodation?.message}</p>
+                                    </div>
+                                )}
+                                {accommodations && (
+                                    <select className="form-select" 
+                                        id="accomodation_id"
+                                        {...register("accomodation_id", { required: "Accommodation selection is required" })}
+                                    >
+                                        {accommodations?.map((acc) => (
                                             <option key={acc.id} value={acc.id}>
                                                 {acc.name}
                                             </option>
-                                        ))
-                                    )}
-                                </select>
+                                        ))}
+                                    </select>
+                                )}
+                            
                                 {errors.accomodation_id && <p className="text-danger mt-2">{errors.accomodation_id.message}</p>}
                             </div>
                         </div>
                         <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" onClick={onClose}>
-                                Cancelar
-                            </button>
-                            <button type="submit" className="btn btn-primary">
-                                Guardar Cambios
-                            </button>
+                            {isPendingCreate ? (
+                                <div className="d-flex justify-content-center align-items-center">
+                                    <Spinner animation="border" role="status">
+                                        <span className="visually-hidden">Cargando...</span>
+                                    </Spinner>
+                                </div>
+                            ):(
+                               <>
+                                    <button type="button" className="btn btn-secondary" onClick={onClose}>
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" className="btn btn-primary">
+                                        Guardar Cambios
+                                    </button>
+                               </>
+                            )}
                         </div>
                     </form>
                 </div>
