@@ -9,7 +9,7 @@ import AddIcon from '@mui/icons-material/Add';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 // getDataAPI
 import { getAccomodations } from '../../services/accomodationServices'
-import getBookings from '../../services/bookingsServices';
+import { getBookings } from '../../services/bookingsServices';
 // calendar
 import BookingsCalendar from './BookingsCalendar';
 // components
