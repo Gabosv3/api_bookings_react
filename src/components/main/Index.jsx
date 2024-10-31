@@ -11,7 +11,7 @@ import { useDemoRouter } from "@toolpad/core/internal";
 
 // Importa tus componentes
 import Accomodations from "../accomodations/Accomodations";
-import ViewBookings from "../bookings/Bookings";
+import ViewBookings from "../bookings/ViewBookings";
 
 // Define la navegación sin tipos
 const demoTheme = createTheme({

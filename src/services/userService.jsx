@@ -7,7 +7,6 @@ export const useGetUsers = () => {
     const { data, isLoading, isError, isSuccess, error } = useQuery({
         queryKey: ['users'],
         queryFn: () => findAllUsers(),
-        onSuccess:(data) => setBrands(data?.data),
         refetchOnWindowFocus:false
     });
     return { data, isLoading, isError, isSuccess, error };
