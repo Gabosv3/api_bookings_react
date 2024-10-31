@@ -14,9 +14,11 @@ const getAccomodations = async () => {
                 'Authorization': `Bearer ${token}`
             }
         });
+        console.log("accomodations: ",response);        
         return response.data;
     }catch(error){
         console.error("Error al obtener los alojamientos", error);
+        return []
     }
 }
 

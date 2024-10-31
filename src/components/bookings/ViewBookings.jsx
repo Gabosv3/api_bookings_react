@@ -22,31 +22,47 @@ export default function ViewBookings() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [events, setEvents] = useState([])
+  const [eventsLoading, setEventsLoading] = useState(true)
 
   const fetchData = async () => {
     try {
-      const responseAccomodations = await getAccomodations();
-      const responseBookings = await getBookings();
-      setAccomodations(responseAccomodations);
-      setBookings(responseBookings);
+      const session_token = sessionStorage.getItem("token_bookings");
+
+      if (session_token) {
+        setIsAuthenticated(true);
+
+        const responseAccomodations = await getAccomodations();
+        const responseBookings = await getBookings();
+        setAccomodations(responseAccomodations);
+        setBookings(responseBookings);
+
+        const eventFromBookings = responseBookings.map((booking) => ({     
+          id: booking.id,
+          title: booking.user,
+          start: booking.check_in_date,
+          end: booking.check_out_date
+        }))
+        setEvents(eventFromBookings)
+        setEventsLoading(false)
+        console.log("event: ",events[0]);
+        
+      } else {
+        setIsAuthenticated(false);
+      }      
     } catch (error) {
       console.error("Error al obtener la información:", error);
-    } finally {
-      console.log("finalizo");
-      
+    } finally {     
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    
+  }, [bookings])
   
   useEffect(() => {
-    const session_token = sessionStorage.getItem("token_bookings");
-    if (session_token) {
-      setIsAuthenticated(true);
-      fetchData();
-    } else {
-      setIsAuthenticated(false);
-      setLoading(false);
-    }
+    fetchData();
   }, []);
 
   return (
@@ -136,7 +152,9 @@ export default function ViewBookings() {
                       />
                     </div>
                   </div>
-                  <BookingsCalendar />
+                    {/* Only show BookingsCalendar if bookings data is available */}
+                    {console.log("antes de mandar por props", events)}
+                  {bookings.length > 0 && !eventsLoading ? <BookingsCalendar events={events} /> : <p>oal</p>}
                 </>
               )
             }            
