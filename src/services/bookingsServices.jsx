@@ -23,4 +23,22 @@ const getBookings = async () => {
     }
 }
 
-export default getBookings
+//Al cancelar una reservacion debemos actualizar su estado
+const updateStatusBooking = async (id, status) => {
+    try {
+        const response = await axios.patch(`https://apibookingsaccomodations-production.up.railway.app/api/V1/status_booking/${id}`, status,
+            {
+                headers: {
+                    //agregamos el token para la autorizacion
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            console.log("probando cancelar reservacion");
+            console.log(response);
+            return response.data;
+    } catch (error) {
+        console.error("Error al actualizar el estado de la reservacion", error);
+    }
+}
+
+export { getBookings, updateStatusBooking}
