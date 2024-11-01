@@ -55,7 +55,7 @@ const getBookingsByAccomodationId = async (id) => {
                 }
             }            
         )
-        console.log("booking by id: ",response);    
+        console.log("booking by id: ",response.data);    
         return response.data    
 
     } catch (error) {

@@ -19,7 +19,7 @@ export default function BookingsCalendar({ events }) {
   const calendar = useCalendarApp({
     
     views: [createViewMonthGrid(), createViewMonthAgenda()],
-    events: events,
+    events: events.length > 0 ? events : [],
     calendars: {
       CONFIRMED: {
         colorName: 'CONFIRMED',
@@ -69,15 +69,17 @@ export default function BookingsCalendar({ events }) {
     if(events.length > 0){
       calendar.eventsService.getAll()
       setLoading(false)
+    } else {
+      setLoading(true)
     }
-  },[])   
+  },[events, calendar])   
 
   return (
     <div>      
       {/* Only show Calendar if bookings data is available */}
-      { console.log("antes de renderizar",events) }
+      { console.log("antes de renderizar",events, loading) }
       
-      { events.length > 0 && !loading ? (<ScheduleXCalendar calendarApp={calendar} /> ) : (<p>Cargando calendario</p>)}
+      { events.length > 0 && !loading ? (<ScheduleXCalendar calendarApp={calendar} /> ) : (<p>Cargando calendario desde componente</p>)}
            
     </div>
   )

@@ -25,6 +25,7 @@ export default function ViewBookings() {
   const [events, setEvents] = useState([])
   const [eventsLoading, setEventsLoading] = useState(true)
   const [selectedAccomodation, setSelectedAccomodation] = useState('');
+  const [allEvents, setAllEvents] = useState([]);
 
 
   const fetchData = async () => {
@@ -36,8 +37,10 @@ export default function ViewBookings() {
         setLoading(true);
         setEventsLoading(true);
         setIsAuthenticated(true);
+
         const responseAccomodations = await getAccomodations();
         const responseBookings = await getBookings();
+
         setAccomodations(responseAccomodations);
         setBookings(responseBookings);
 
@@ -49,7 +52,9 @@ export default function ViewBookings() {
           calendarId: booking.status,
           description: booking.status
         }))
-        setEvents(eventFromBookings)        
+
+        setEvents(eventFromBookings)      
+        setAllEvents(eventFromBookings)  
       } else {
         setIsAuthenticated(false);
       }      
@@ -66,11 +71,38 @@ export default function ViewBookings() {
   }, []);
 
   useEffect(()=> {
-    const id = bookings.map((booking) => (
+    setEventsLoading(true)
+    console.log(selectedAccomodation);
+    
+    const fetchEventsByAccomodations = () => {
 
-    ))
-    setEvents()
-  },[selectedAccomodation])
+      const selected = bookings
+      .filter((booking) => booking.accomodation == selectedAccomodation)
+      .map((booking)=> ({
+          id: booking.id,
+          title: booking.user,
+          start: booking.check_in_date,
+          end: booking.check_out_date,
+          calendarId: booking.status,
+          description: booking.status
+        }))
+
+        if(selected.length > 0){
+          setEvents(selected)
+        } else{
+          alert(`No hay bookings para el alojamiento: ${selectedAccomodation}`)
+          setEvents(allEvents)
+        }
+    }
+    
+    if(selectedAccomodation){
+      fetchEventsByAccomodations()
+    } else {
+      setEvents(allEvents)
+    }
+    
+    setEventsLoading(false)      
+  },[selectedAccomodation, bookings, allEvents])
 
   return (
     <>
@@ -114,9 +146,6 @@ export default function ViewBookings() {
                       { /** mostrar select alojamientos */}
                       <Autocomplete
                           disablePortal
-                          key={accomodations.map((accomodation) => (
-                            accomodation.id
-                          ))}
                           options={accomodations.map((accomodation) => (
                             accomodation.name
                           ))}
@@ -165,7 +194,8 @@ export default function ViewBookings() {
 
                   {/* Only show BookingsCalendar if bookings data is available */}
                   {console.log("antes de mandar por props", events)}
-                  {!eventsLoading && events.length > 0 ? (<BookingsCalendar events={events} />) : (<p>Cargando calendario</p>)}
+                  {console.log(eventsLoading)}
+                  {!eventsLoading && events.length > 0 ? (<BookingsCalendar events={events.length > 0 ? events: allEvents} />) : (<p>Cargando calendario desde view</p>)}
                     
                 </>
               )
