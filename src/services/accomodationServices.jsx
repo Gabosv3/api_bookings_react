@@ -2,10 +2,10 @@ import axios from "axios";
 import { defaultAxiosWithToken } from "../utils/http";
 import { useQuery } from "@tanstack/react-query";
 
-//obtenemos el token que se guarda en el sessionstorage
-const token = sessionStorage.getItem('token_bookings')
-
 const getAccomodations = async () => {
+    
+    //obtenemos el token que se guarda en el sessionstorage
+    const token = sessionStorage.getItem('token_bookings')
     try{
 
         const response = await axios.get("https://apibookingsaccomodations-production.up.railway.app/api/V1/accomodations", {

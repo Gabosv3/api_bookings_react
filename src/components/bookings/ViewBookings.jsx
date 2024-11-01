@@ -9,7 +9,7 @@ import AddIcon from '@mui/icons-material/Add';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 // getDataAPI
 import { getAccomodations } from '../../services/accomodationServices'
-import { getBookings } from '../../services/bookingsServices';
+import { getBookings, getBookingsByAccomodationId } from '../../services/bookingsServices';
 // calendar
 import BookingsCalendar from './BookingsCalendar';
 // components
@@ -24,14 +24,18 @@ export default function ViewBookings() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [events, setEvents] = useState([])
   const [eventsLoading, setEventsLoading] = useState(true)
+  const [selectedAccomodation, setSelectedAccomodation] = useState('');
+
 
   const fetchData = async () => {
+
     try {
       const session_token = sessionStorage.getItem("token_bookings");
 
       if (session_token) {
+        setLoading(true);
+        setEventsLoading(true);
         setIsAuthenticated(true);
-
         const responseAccomodations = await getAccomodations();
         const responseBookings = await getBookings();
         setAccomodations(responseAccomodations);
@@ -41,12 +45,11 @@ export default function ViewBookings() {
           id: booking.id,
           title: booking.user,
           start: booking.check_in_date,
-          end: booking.check_out_date
+          end: booking.check_out_date,
+          calendarId: booking.status,
+          description: booking.status
         }))
-        setEvents(eventFromBookings)
-        setEventsLoading(false)
-        console.log("event: ",events[0]);
-        
+        setEvents(eventFromBookings)        
       } else {
         setIsAuthenticated(false);
       }      
@@ -54,16 +57,20 @@ export default function ViewBookings() {
       console.error("Error al obtener la información:", error);
     } finally {     
       setLoading(false);
+      setEventsLoading(false);
     }
-  };
+  };  
 
-  useEffect(() => {
-    
-  }, [bookings])
-  
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(()=> {
+    const id = bookings.map((booking) => (
+
+    ))
+    setEvents()
+  },[selectedAccomodation])
 
   return (
     <>
@@ -71,20 +78,22 @@ export default function ViewBookings() {
         <div className='d-flex justify-content-center flex-column'>      
           <div>
             {
-              loading ? (
+              loading && eventsLoading ? (
                 <div className="d-flex justify-content-center align-items-center vh-100">
                   <Spinner animation="border" role="status">
                     <span className="visually-hidden">Cargando...</span>
                   </Spinner>
                 </div>
-              ) : (    
+              ) 
+              :               
+              (    
                 <>            
                   <div className='d-flex flex-column justify-content-center align-content-center pb-3'>
                     <div className='w-100 d-flex justify-content-end gap-3'>                  
                                         
                       <Button variant='text' color='grey' startIcon={<FilterAltIcon />}>Filtros</Button>
                       <Button variant="contained" 
-                        className="bg-dark" 
+                        color="primary" 
                         onClick={() => setIsModalOpen(true)}
                         startIcon={<AddIcon />}>
                           Nueva Reservación
@@ -112,6 +121,7 @@ export default function ViewBookings() {
                             accomodation.name
                           ))}
                           className='w-25'
+                          onChange={(e, value) => setSelectedAccomodation(value)}
                           renderInput={(params) => <TextField {...params} label="Alojamientos" variant="standard"/>
                         }
                       />
@@ -152,9 +162,11 @@ export default function ViewBookings() {
                       />
                     </div>
                   </div>
-                    {/* Only show BookingsCalendar if bookings data is available */}
-                    {console.log("antes de mandar por props", events)}
-                  {bookings.length > 0 && !eventsLoading ? <BookingsCalendar events={events} /> : <p>oal</p>}
+
+                  {/* Only show BookingsCalendar if bookings data is available */}
+                  {console.log("antes de mandar por props", events)}
+                  {!eventsLoading && events.length > 0 ? (<BookingsCalendar events={events} />) : (<p>Cargando calendario</p>)}
+                    
                 </>
               )
             }            

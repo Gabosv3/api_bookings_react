@@ -40,4 +40,29 @@ const updateStatusBooking = async (id, status) => {
     }
 }
 
-export { getBookings, updateStatusBooking}
+// traer bookings segun id de la accomodation
+
+const getBookingsByAccomodationId = async (id) => {
+
+    try {
+        const token = sessionStorage.getItem('token_bookings')
+
+        const response = await axios.get(`https://apibookingsaccomodations-production.up.railway.app/api/V1/bookings/calendar/${id}`,
+            {
+                headers: {
+                    //agregamos el token para la autorizacion
+                    'Authorization': `Bearer ${token}`
+                }
+            }            
+        )
+        console.log("booking by id: ",response);    
+        return response.data    
+
+    } catch (error) {
+        console.error('Error al obtener los datos',error.message);
+        return []
+    }
+
+}
+
+export { getBookings, getBookingsByAccomodationId, updateStatusBooking}
