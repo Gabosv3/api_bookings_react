@@ -62,7 +62,6 @@ export default function ViewBookings() {
       console.error("Error al obtener la información:", error);
     } finally {     
       setLoading(false);
-      setEventsLoading(false);
     }
   };  
 
@@ -97,12 +96,26 @@ export default function ViewBookings() {
     
     if(selectedAccomodation){
       fetchEventsByAccomodations()
+      setEventsLoading(false)   
     } else {
-      setEvents(allEvents)
+      setEvents(allEvents)      
+      setEventsLoading(false)   
     }
-    
-    setEventsLoading(false)      
+       
   },[selectedAccomodation, bookings, allEvents])
+
+  const handleChange = (e) => {
+
+    console.log(e.target.textContent);
+    
+    if(e.target.textContent == 'Confirmada'){
+      console.log('buscar confirmadas');
+    } else if (e.target.textContent == 'Pendiente'){
+      console.log('buscar pendientes');
+    } else if(e.target.textContent == 'Cancelada' ){
+      console.log('buscar canceladas');      
+    } 
+  }
 
   return (
     <>
@@ -150,7 +163,7 @@ export default function ViewBookings() {
                             accomodation.name
                           ))}
                           className='w-25'
-                          onChange={(e, value) => setSelectedAccomodation(value)}
+                          onChange={(e,value) => setSelectedAccomodation(value)}
                           renderInput={(params) => <TextField {...params} label="Alojamientos" variant="standard"/>
                         }
                       />
@@ -161,6 +174,7 @@ export default function ViewBookings() {
                           disablePortal
                           options={["Confirmada", "Pendiente", "Cancelada"]}
                           className='w-25'
+                          onChange={(e) => handleChange(e)}
                           renderInput={(params) => <TextField {...params} label="Estado" variant="standard"/>
                         }
                       />

@@ -67,10 +67,8 @@ export default function BookingsCalendar({ events }) {
   useEffect(() => {
     // get all events
     if(events.length > 0){
-      calendar.eventsService.getAll()
+      calendar.eventsService.set(events)
       setLoading(false)
-    } else {
-      setLoading(true)
     }
   },[events, calendar])   
 
