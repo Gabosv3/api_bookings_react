@@ -13,7 +13,6 @@ const getBookings = async () => {
                 }
             }            
         )
-        console.log("bookings: ",response);    
         return response.data    
 
     } catch (error) {
@@ -65,4 +64,15 @@ const getBookingsByAccomodationId = async (id) => {
 
 }
 
-export { getBookings, getBookingsByAccomodationId, updateStatusBooking}
+const getUserOfBookings = async () => {
+
+    const bookings = await getBookings()
+
+    const names = bookings.map((booking) => booking.user)
+
+    const user = names.filter((value, i, self) => self.indexOf(value) === i);
+
+    return user
+}
+
+export { getBookings, getBookingsByAccomodationId, updateStatusBooking, getUserOfBookings}

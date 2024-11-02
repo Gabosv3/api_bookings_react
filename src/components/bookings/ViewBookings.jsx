@@ -9,7 +9,7 @@ import AddIcon from '@mui/icons-material/Add';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 // getDataAPI
 import { getAccomodations } from '../../services/accomodationServices'
-import { getBookings, getBookingsByAccomodationId } from '../../services/bookingsServices';
+import { getBookings, getBookingsByAccomodationId, getUserOfBookings } from '../../services/bookingsServices';
 // calendar
 import BookingsCalendar from './BookingsCalendar';
 // components
@@ -17,40 +17,50 @@ import NewBookingModal from "./NewBookingModal";
 
 
 export default function ViewBookings() {
+  // estados para la informacion traida de la api
   const [accomodations, setAccomodations] = useState([]);
   const [bookings, setBookings] = useState([])
+  // estados para el control de las vistas
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // estados para el control de los renderizados
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // estados para el manejo de busquedas y los eventos mostrados en el calendar
+  const [user, setUser] = useState([])
   const [events, setEvents] = useState([])
+  const [allEvents, setAllEvents] = useState([]);
   const [eventsLoading, setEventsLoading] = useState(true)
   const [selectedAccomodation, setSelectedAccomodation] = useState('');
-  const [allEvents, setAllEvents] = useState([]);
+  const [selectedState, setSelectedState] = useState('');
+  const [selectedName, setSelectedName] = useState('')
 
 
   const fetchData = async () => {
-
+    
+    setLoading(true)
     try {
       const session_token = sessionStorage.getItem("token_bookings");
 
       if (session_token) {
-        setLoading(true);
-        setEventsLoading(true);
         setIsAuthenticated(true);
 
         const responseAccomodations = await getAccomodations();
         const responseBookings = await getBookings();
+        const names = await getUserOfBookings()
 
         setAccomodations(responseAccomodations);
         setBookings(responseBookings);
+        setUser(names)
 
         const eventFromBookings = responseBookings.map((booking) => ({     
           id: booking.id,
           title: booking.user,
+          people: [booking.user],
           start: booking.check_in_date,
           end: booking.check_out_date,
           calendarId: booking.status,
-          description: booking.status
+          description: booking.status,
+          location: booking.accomodation
         }))
 
         setEvents(eventFromBookings)      
@@ -70,51 +80,47 @@ export default function ViewBookings() {
   }, []);
 
   useEffect(()=> {
-    setEventsLoading(true)
-    console.log(selectedAccomodation);
-    
-    const fetchEventsByAccomodations = () => {
 
-      const selected = bookings
-      .filter((booking) => booking.accomodation == selectedAccomodation)
-      .map((booking)=> ({
-          id: booking.id,
-          title: booking.user,
-          start: booking.check_in_date,
-          end: booking.check_out_date,
-          calendarId: booking.status,
-          description: booking.status
-        }))
-
-        if(selected.length > 0){
-          setEvents(selected)
-        } else{
-          alert(`No hay bookings para el alojamiento: ${selectedAccomodation}`)
-          setEvents(allEvents)
-        }
-    }
-    
     if(selectedAccomodation){
+      setEventsLoading(true)
+      console.log(selectedAccomodation);    
+      const fetchEventsByAccomodations = () => {
+  
+        const selected = bookings
+        .filter((booking) => booking.accomodation == selectedAccomodation)
+        .map((booking)=> ({
+            id: booking.id,
+            title: booking.booking.toUpperCase(),
+            people: [booking.user],
+            start: booking.check_in_date,
+            end: booking.check_out_date,
+            calendarId: booking.status,
+            description: booking.status,
+            location: booking.accomodation
+          }))
+
+          setEvents(selected.length > 0 ? selected : allEvents)
+
+          if (selected.length === 0) {
+            alert(`No hay bookings para el alojamiento: ${selectedAccomodation}`);
+          }
+
+          setEventsLoading(false)   
+      }
       fetchEventsByAccomodations()
-      setEventsLoading(false)   
-    } else {
-      setEvents(allEvents)      
-      setEventsLoading(false)   
-    }
-       
+    } else{
+      setEvents(allEvents)
+      setEventsLoading(false)
+    }       
   },[selectedAccomodation, bookings, allEvents])
 
-  const handleChange = (e) => {
-
-    console.log(e.target.textContent);
+  const applyFilters = () => {
     
-    if(e.target.textContent == 'Confirmada'){
-      console.log('buscar confirmadas');
-    } else if (e.target.textContent == 'Pendiente'){
-      console.log('buscar pendientes');
-    } else if(e.target.textContent == 'Cancelada' ){
-      console.log('buscar canceladas');      
-    } 
+    console.log(selectedAccomodation);
+    console.log(selectedState);    
+    console.log(selectedName);
+    
+
   }
 
   return (
@@ -122,8 +128,10 @@ export default function ViewBookings() {
       <div className='w-100'>
         <div className='d-flex justify-content-center flex-column'>      
           <div>
-            {
-              loading && eventsLoading ? (
+            {console.log("estado: ",loading, " estadooo: ", eventsLoading)
+            }
+            {              
+              loading || eventsLoading ? (
                 <div className="d-flex justify-content-center align-items-center vh-100">
                   <Spinner animation="border" role="status">
                     <span className="visually-hidden">Cargando...</span>
@@ -136,7 +144,14 @@ export default function ViewBookings() {
                   <div className='d-flex flex-column justify-content-center align-content-center pb-3'>
                     <div className='w-100 d-flex justify-content-end gap-3'>                  
                                         
-                      <Button variant='text' color='grey' startIcon={<FilterAltIcon />}>Filtros</Button>
+                      <Button 
+                        variant='text' 
+                        color='grey' 
+                        onClick={()=> applyFilters()}
+                        startIcon={<FilterAltIcon />}>
+                          Filtros
+                      </Button>
+
                       <Button variant="contained" 
                         color="primary" 
                         onClick={() => setIsModalOpen(true)}
@@ -174,7 +189,7 @@ export default function ViewBookings() {
                           disablePortal
                           options={["Confirmada", "Pendiente", "Cancelada"]}
                           className='w-25'
-                          onChange={(e) => handleChange(e)}
+                          onChange={(e) => setSelectedState(e.target.textContent)}
                           renderInput={(params) => <TextField {...params} label="Estado" variant="standard"/>
                         }
                       />
@@ -183,11 +198,8 @@ export default function ViewBookings() {
                           freeSolo
                           id="search-by-name"
                           className='w-25'
-                          key={bookings.map((booking) => (
-                            booking.id
-                          ))}
-                          disableClearable
-                          options={bookings.map((booking) => booking.user)}
+                          onChange={(e, value) => setSelectedName(value)}
+                          options={user}
                           renderInput={(params) => (
                             <TextField
                               {...params}
@@ -207,8 +219,6 @@ export default function ViewBookings() {
                   </div>
 
                   {/* Only show BookingsCalendar if bookings data is available */}
-                  {console.log("antes de mandar por props", events)}
-                  {console.log(eventsLoading)}
                   {!eventsLoading && events.length > 0 ? (<BookingsCalendar events={events.length > 0 ? events: allEvents} />) : (<p>Cargando calendario desde view</p>)}
                     
                 </>
