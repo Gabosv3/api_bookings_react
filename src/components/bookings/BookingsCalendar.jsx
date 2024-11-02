@@ -70,6 +70,7 @@ export default function BookingsCalendar({ events }) {
     config: {
       callbacks: {
         onEventClick(calendarEvent) {
+          setShowModal(false);
           setSelectedEvent(calendarEvent);
           setShowModal(true);
         },
@@ -85,11 +86,7 @@ export default function BookingsCalendar({ events }) {
     }
   },[events, calendar])   
 
-  useEffect(() => {
-    console.log(showModal, ' ', selectedEvent);
-    
-  },[showModal,selectedEvent])
-
+  
   return (
 
     <>

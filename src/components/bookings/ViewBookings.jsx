@@ -79,49 +79,53 @@ export default function ViewBookings() {
     fetchData();
   }, []);
 
-  useEffect(()=> {
-
-    if(selectedAccomodation){
-      setEventsLoading(true)
-      console.log(selectedAccomodation);    
-      const fetchEventsByAccomodations = () => {
-  
-        const selected = bookings
-        .filter((booking) => booking.accomodation == selectedAccomodation)
-        .map((booking)=> ({
-            id: booking.id,
-            title: booking.booking.toUpperCase(),
-            people: [booking.user],
-            start: booking.check_in_date,
-            end: booking.check_out_date,
-            calendarId: booking.status,
-            description: booking.status,
-            location: booking.accomodation
-          }))
-
-          setEvents(selected.length > 0 ? selected : allEvents)
-
-          if (selected.length === 0) {
-            alert(`No hay bookings para el alojamiento: ${selectedAccomodation}`);
-          }
-
-          setEventsLoading(false)   
-      }
-      fetchEventsByAccomodations()
-    } else{
-      setEvents(allEvents)
-      setEventsLoading(false)
-    }       
-  },[selectedAccomodation, bookings, allEvents])
-
-  const applyFilters = () => {
+  useEffect(() => {
     
-    console.log(selectedAccomodation);
-    console.log(selectedState);    
-    console.log(selectedName);
-    
+    if (selectedAccomodation || selectedState || selectedName) {
+        setEventsLoading(true);
+        let status = ''
+        if(selectedState == 'Confirmada') status = 'CONFIRMED'
+        if(selectedState == 'Cancelada') status = 'CANCELLED' 
 
-  }
+        const fetchFilteredEvents = () => {
+            const filteredEvents = bookings
+                .filter((booking) => {
+                    // Apply each filter conditionally
+                    const matchesAccommodation = selectedAccomodation ? booking.accomodation === selectedAccomodation : true;
+                    const matchesStatus = selectedState ? booking.status === status : true;
+                    const matchesUser = selectedName ? booking.user === selectedName : true;
+
+                    return matchesAccommodation && matchesStatus && matchesUser;
+                })
+                .map((booking) => ({
+                    id: booking.id,
+                    title: booking.booking.toUpperCase(),
+                    people: [booking.user],
+                    start: booking.check_in_date,
+                    end: booking.check_out_date,
+                    calendarId: booking.status,
+                    description: booking.status,
+                    location: booking.accomodation
+                }));
+
+            setEvents(filteredEvents.length > 0 ? filteredEvents : allEvents);
+
+            if (filteredEvents.length === 0) {
+                alert('No hay bookings que coincidan con los filtros seleccionados.');
+            }
+
+            setEventsLoading(false);
+        };
+
+        fetchFilteredEvents();
+    } else {
+        // Reset to show all events if no filters are selected
+        setEvents(allEvents);
+        setEventsLoading(false);
+    }
+}, [selectedAccomodation, selectedState, selectedName, bookings, allEvents]);
+
+
 
   return (
     <>
@@ -147,7 +151,7 @@ export default function ViewBookings() {
                       <Button 
                         variant='text' 
                         color='grey' 
-                        onClick={()=> applyFilters()}
+                        onClick={()=> setEvents()}
                         startIcon={<FilterAltIcon />}>
                           Filtros
                       </Button>

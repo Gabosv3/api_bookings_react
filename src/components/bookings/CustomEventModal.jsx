@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import { Modal, Button } from 'react-bootstrap';
 
-const CustomEventModal = ({ calendarEvent, showM }) => {
+const CustomEventModal = ({ calendarEvent }) => {
 
     const [show, setShow] = useState(true)
     console.log(calendarEvent);
@@ -17,7 +17,7 @@ const CustomEventModal = ({ calendarEvent, showM }) => {
       </Modal.Header>
       <Modal.Body>
         <p>User: {calendarEvent.people}</p>
-        <p>Accomodation: {calendarEvent.Location}</p>
+        <p>Accomodation: {calendarEvent.location}</p>
         <p>Check In Date: {calendarEvent.start}</p>
         <p>Check Out Date: {calendarEvent.end}</p>
         <p>Amount: {}</p>
