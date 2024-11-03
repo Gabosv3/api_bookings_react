@@ -106,9 +106,6 @@ const AccomodationsList = ({ accomodations, isAuthenticated, loading, onOpenModa
                     <button className="btn btn-primary mx-3">
                       <i className="bi bi-pencil-square"></i>
                     </button>
-                    <button className="btn btn-danger">
-                      <i className="bi bi-trash"></i>
-                    </button>
                   </div>
                 </div>
               </div>

@@ -24,6 +24,7 @@ const getAccomodations = async () => {
 
 //Creando la función con el metodo post, que nos permitirá agregar un nuevo alojamiento
 const createAccommodation = async (data) => {
+    const token = sessionStorage.getItem('token_bookings')
     try {
         const response = await axios.post("https://apibookingsaccomodations-production.up.railway.app/api/V1/accomodation", data, {
             headers: {
@@ -35,8 +36,6 @@ const createAccommodation = async (data) => {
         console.error("Error al crear el alojamiento", error);
     }
 }
-
-export { getAccomodations, createAccommodation};
 
 //other approach
 const findAlAccomodations = async () => (await defaultAxiosWithToken.get('/accomodations')).data;
@@ -50,5 +49,4 @@ const useGetAccomodations = () => {
     return { data, isLoading, isError, isSuccess, error };
 }
 
-export { getAccomodations, useGetAccomodations }
-
+export { getAccomodations, createAccommodation, useGetAccomodations};
