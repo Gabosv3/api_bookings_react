@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-
+import Swal from 'sweetalert2';
 // materialUI
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -111,7 +111,16 @@ export default function ViewBookings() {
             setEvents(filteredEvents.length > 0 ? filteredEvents : allEvents);
 
             if (filteredEvents.length === 0) {
-                alert('No hay bookings que coincidan con los filtros seleccionados.');
+                Swal.fire({
+                    title: "No se encontraron reservaciones",
+                    text: "Intenta con otros filtros",
+                    icon: "info",
+                    confirmButtonText: "Entendido",
+                });
+                // Reset to show all events if no filters are selected
+                setEvents(allEvents);
+                setEventsLoading(false);
+    
             }
 
             setEventsLoading(false);
