@@ -1,8 +1,36 @@
-# React + Vite
+# api-bookings-react
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+ 
+### `Bootcamp fsj-24a`
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### **Presentado por:**
+| Apellido | Nombre |
+| -- | -- |
+| Muñoz | Estefany |   
+| Majano | Diego |
+| Hernández | Celina | 
+| Castillo | Gabriel |   
+| Alvarenga | Josías |             
+
+---
+
+## Installation
+
+Clone the repository
+
+    git clone https://github.com/Gabosv3/api_bookings_react.git
+
+Switch to the repo folder
+
+    cd api_bookings_react
+
+Install all the FrontEnd Dependencies with your package manager (ex: npm)
+
+    npm install
+
+Start the local development server
+    npm run dev
+
+You can now access the server at http://localhost:5173
