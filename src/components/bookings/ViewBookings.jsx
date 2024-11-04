@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-
+import Swal from 'sweetalert2';
 // materialUI
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -91,50 +91,59 @@ export default function ViewBookings() {
   }, []);
 
   useEffect(() => {
-
+    
     if (selectedAccomodation || selectedState || selectedName) {
-      setEventsLoading(true);
-      let status = ''
-      if (selectedState == 'Confirmada') status = 'CONFIRMED'
-      if (selectedState == 'Cancelada') status = 'CANCELLED'
+        setEventsLoading(true);
+        let status = ''
+        if(selectedState == 'Confirmada') status = 'CONFIRMED'
+        if(selectedState == 'Cancelada') status = 'CANCELLED' 
 
-      const fetchFilteredEvents = () => {
-        const filteredEvents = bookings
-          .filter((booking) => {
-            // Apply each filter conditionally
-            const matchesAccommodation = selectedAccomodation ? booking.accomodation === selectedAccomodation : true;
-            const matchesStatus = selectedState ? booking.status === status : true;
-            const matchesUser = selectedName ? booking.user === selectedName : true;
+        const fetchFilteredEvents = () => {
+            const filteredEvents = bookings
+                .filter((booking) => {
+                    // Apply each filter conditionally
+                    const matchesAccommodation = selectedAccomodation ? booking.accomodation === selectedAccomodation : true;
+                    const matchesStatus = selectedState ? booking.status === status : true;
+                    const matchesUser = selectedName ? booking.user === selectedName : true;
 
-            return matchesAccommodation && matchesStatus && matchesUser;
-          })
-          .map((booking) => ({
-            id: booking.id,
-            title: booking.booking.toUpperCase(),
-            people: [booking.user],
-            start: booking.check_in_date,
-            end: booking.check_out_date,
-            calendarId: booking.status,
-            description: booking.status,
-            location: booking.accomodation
-          }));
+                    return matchesAccommodation && matchesStatus && matchesUser;
+                })
+                .map((booking) => ({
+                    id: booking.id,
+                    title: booking.booking.toUpperCase(),
+                    people: [booking.user],
+                    start: booking.check_in_date,
+                    end: booking.check_out_date,
+                    calendarId: booking.status,
+                    description: booking.status,
+                    location: booking.accomodation
+                }));
 
-        setEvents(filteredEvents.length > 0 ? filteredEvents : allEvents);
+            setEvents(filteredEvents.length > 0 ? filteredEvents : allEvents);
 
-        if (filteredEvents.length === 0) {
-          alert('No hay bookings que coincidan con los filtros seleccionados.');
-        }
+            if (filteredEvents.length === 0) {
+                Swal.fire({
+                    title: "No se encontraron reservaciones",
+                    text: "Intenta con otros filtros",
+                    icon: "info",
+                    confirmButtonText: "Entendido",
+                });
+                // Reset to show all events if no filters are selected
+                setEvents(allEvents);
+                setEventsLoading(false);
+    
+            }
 
-        setEventsLoading(false);
-      };
+            setEventsLoading(false);
+        };
 
-      fetchFilteredEvents();
+        fetchFilteredEvents();
     } else {
-      // Reset to show all events if no filters are selected
-      setEvents(allEvents);
-      setEventsLoading(false);
+        // Reset to show all events if no filters are selected
+        setEvents(allEvents);
+        setEventsLoading(false);
     }
-  }, [selectedAccomodation, selectedState, selectedName, bookings, allEvents]);
+}, [selectedAccomodation, selectedState, selectedName, bookings, allEvents]);
 
 
 
@@ -152,18 +161,18 @@ export default function ViewBookings() {
                     <span className="visually-hidden">Cargando...</span>
                   </Spinner>
                 </div>
-              )
-                :
-                (
-                  <>
-                    <div className='d-flex flex-column justify-content-center align-content-center pb-3'>
-                      <div className='w-100 d-flex justify-content-end gap-3'>
-
-                        <Button
-                          variant='text'
-                          color='grey'
-                          onClick={() => setEvents()}
-                          startIcon={<FilterAltIcon />}>
+              ) 
+              :               
+              (    
+                <>            
+                  <div className='d-flex flex-column justify-content-center align-content-center pb-3'>
+                    <div className='w-100 d-flex justify-content-end gap-3'>                  
+                                        
+                      <Button 
+                        variant='text' 
+                        color='grey' 
+                        onClick={()=> setEvents()}
+                        startIcon={<FilterAltIcon />}>
                           Filtros
                         </Button>
 
