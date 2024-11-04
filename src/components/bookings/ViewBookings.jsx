@@ -36,7 +36,7 @@ export default function ViewBookings() {
 
 
   const fetchData = async () => {
-    
+
     setLoading(true)
     try {
       const session_token = sessionStorage.getItem("token_bookings");
@@ -52,43 +52,63 @@ export default function ViewBookings() {
         setBookings(responseBookings);
         setUser(names)
 
-        const eventFromBookings = responseBookings.map((booking) => ({     
-          id: booking.id,
-          title: booking.user,
-          people: [booking.user],
-          start: booking.check_in_date,
-          end: booking.check_out_date,
-          calendarId: booking.status,
-          description: booking.status,
-          location: booking.accomodation
-        }))
+        // Mapea las reservaciones y asocia datos de alojamiento con validaciones
+        const eventFromBookings = responseBookings.map((booking) => {
+          const accomodation = responseAccomodations.find(accom => accom.id === booking.accomodation_id);
 
-        setEvents(eventFromBookings)      
-        setAllEvents(eventFromBookings)  
+          // Condicional de verificación de existencia de `accomodation`
+          return {
+            id: booking.id,
+            title: booking.user,
+            people: [booking.user],
+            start: booking.check_in_date,
+            end: booking.check_out_date,
+            calendarId: booking.status,
+            description: booking.status,
+            location: booking.accomodation,
+            idAccomodation: booking.accomodation_id,
+            addressAccomodation: accomodation ? accomodation.address : "No disponible",
+            imageUrlAccomodation: accomodation ? accomodation.image : null, // URL de la imagen si existe
+          };
+        });
+
+        console.log("Probando direccion e imagen", eventFromBookings);
+
+        setEvents(eventFromBookings)
+        setAllEvents(eventFromBookings)
       } else {
         setIsAuthenticated(false);
-      }      
+      }
     } catch (error) {
       console.error("Error al obtener la información:", error);
-    } finally {     
+    } finally {
       setLoading(false);
     }
-  };  
+  };
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  useEffect(()=> {
+  useEffect(() => {
 
-    if(selectedAccomodation){
-      setEventsLoading(true)
-      console.log(selectedAccomodation);    
-      const fetchEventsByAccomodations = () => {
-  
-        const selected = bookings
-        .filter((booking) => booking.accomodation == selectedAccomodation)
-        .map((booking)=> ({
+    if (selectedAccomodation || selectedState || selectedName) {
+      setEventsLoading(true);
+      let status = ''
+      if (selectedState == 'Confirmada') status = 'CONFIRMED'
+      if (selectedState == 'Cancelada') status = 'CANCELLED'
+
+      const fetchFilteredEvents = () => {
+        const filteredEvents = bookings
+          .filter((booking) => {
+            // Apply each filter conditionally
+            const matchesAccommodation = selectedAccomodation ? booking.accomodation === selectedAccomodation : true;
+            const matchesStatus = selectedState ? booking.status === status : true;
+            const matchesUser = selectedName ? booking.user === selectedName : true;
+
+            return matchesAccommodation && matchesStatus && matchesUser;
+          })
+          .map((booking) => ({
             id: booking.id,
             title: booking.booking.toUpperCase(),
             people: [booking.user],
@@ -97,104 +117,99 @@ export default function ViewBookings() {
             calendarId: booking.status,
             description: booking.status,
             location: booking.accomodation
-          }))
+          }));
 
-          setEvents(selected.length > 0 ? selected : allEvents)
+        setEvents(filteredEvents.length > 0 ? filteredEvents : allEvents);
 
-          if (selected.length === 0) {
-            alert(`No hay bookings para el alojamiento: ${selectedAccomodation}`);
-          }
+        if (filteredEvents.length === 0) {
+          alert('No hay bookings que coincidan con los filtros seleccionados.');
+        }
 
-          setEventsLoading(false)   
-      }
-      fetchEventsByAccomodations()
-    } else{
-      setEvents(allEvents)
-      setEventsLoading(false)
-    }       
-  },[selectedAccomodation, bookings, allEvents])
+        setEventsLoading(false);
+      };
 
-  const applyFilters = () => {
-    
-    console.log(selectedAccomodation);
-    console.log(selectedState);    
-    console.log(selectedName);
-    
+      fetchFilteredEvents();
+    } else {
+      // Reset to show all events if no filters are selected
+      setEvents(allEvents);
+      setEventsLoading(false);
+    }
+  }, [selectedAccomodation, selectedState, selectedName, bookings, allEvents]);
 
-  }
+
 
   return (
     <>
       <div className='w-100'>
-        <div className='d-flex justify-content-center flex-column'>      
+        <div className='d-flex justify-content-center flex-column'>
           <div>
-            {console.log("estado: ",loading, " estadooo: ", eventsLoading)
+            {console.log("estado: ", loading, " estadooo: ", eventsLoading)
             }
-            {              
+            {
               loading || eventsLoading ? (
                 <div className="d-flex justify-content-center align-items-center vh-100">
                   <Spinner animation="border" role="status">
                     <span className="visually-hidden">Cargando...</span>
                   </Spinner>
                 </div>
-              ) 
-              :               
-              (    
-                <>            
-                  <div className='d-flex flex-column justify-content-center align-content-center pb-3'>
-                    <div className='w-100 d-flex justify-content-end gap-3'>                  
-                                        
-                      <Button 
-                        variant='text' 
-                        color='grey' 
-                        onClick={()=> applyFilters()}
-                        startIcon={<FilterAltIcon />}>
-                          Filtros
-                      </Button>
+              )
+                :
+                (
+                  <>
+                    <div className='d-flex flex-column justify-content-center align-content-center pb-3'>
+                      <div className='w-100 d-flex justify-content-end gap-3'>
 
-                      <Button variant="contained" 
-                        color="primary" 
-                        onClick={() => setIsModalOpen(true)}
-                        startIcon={<AddIcon />}>
+                        <Button
+                          variant='text'
+                          color='grey'
+                          onClick={() => setEvents()}
+                          startIcon={<FilterAltIcon />}>
+                          Filtros
+                        </Button>
+
+                        <Button variant="contained"
+                          color="primary"
+                          onClick={() => setIsModalOpen(true)}
+                          startIcon={<AddIcon />}>
                           Nueva Reservación
-                      </Button>
-                      {isModalOpen && (
-                        <>
+                        </Button>
+                        {isModalOpen && (
+                          <>
                             {/* Renderiza el backdrop */}
                             <div className="modal-backdrop fade show"></div>
                             <NewBookingModal
-                                isOpen={isModalOpen}
-                                onClose={() => setIsModalOpen(false)}
+                              isOpen={isModalOpen}
+                              onClose={() => setIsModalOpen(false)}
                             />
-                        </>
-                    )}
-                    </div>
+                          </>
+                        )}
+                      </div>
 
-                    <div className='d-flex justify-content-around align-content-center w-100'>
-                      { /** mostrar select alojamientos */}
-                      <Autocomplete
+                      <div className='d-flex justify-content-around align-content-center w-100'>
+                        { /** mostrar select alojamientos */}
+                        <Autocomplete
                           disablePortal
                           options={accomodations.map((accomodation) => (
                             accomodation.name
                           ))}
                           className='w-25'
-                          onChange={(e,value) => setSelectedAccomodation(value)}
-                          renderInput={(params) => <TextField {...params} label="Alojamientos" variant="standard"/>
-                        }
-                      />
+                          onChange={(e, value) => setSelectedAccomodation(value)}
+                          renderInput={(params) => <TextField {...params} label="Alojamientos" variant="standard" />
+                          }
+                        />
 
-                      { /** mostrar select estados de bookings */}
+                        { /** mostrar select estados de bookings */}
 
-                      <Autocomplete
+                        <Autocomplete
                           disablePortal
                           options={["Confirmada", "Pendiente", "Cancelada"]}
                           className='w-25'
                           onChange={(e) => setSelectedState(e.target.textContent)}
-                          renderInput={(params) => <TextField {...params} label="Estado" variant="standard"/>
-                        }
-                      />
-                      {/* mostrar buscador por nombre */}
-                      <Autocomplete
+                          renderInput={(params) => <TextField {...params} label="Estado" variant="standard" />
+                          }
+                        />
+                        {/* mostrar buscador por nombre */}
+                        <Autocomplete
                           freeSolo
                           id="search-by-name"
                           className='w-25'
@@ -205,7 +220,7 @@ export default function ViewBookings() {
                               {...params}
                               label="Nombre del huésped"
                               variant="standard"
-                              
+
                               slotProps={{
                                 input: {
                                   ...params.InputProps,
@@ -214,18 +229,18 @@ export default function ViewBookings() {
                               }}
                             />
                           )}
-                      />
+                        />
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Only show BookingsCalendar if bookings data is available */}
-                  {!eventsLoading && events.length > 0 ? (<BookingsCalendar events={events.length > 0 ? events: allEvents} />) : (<p>Cargando calendario desde view</p>)}
-                    
-                </>
-              )
-            }            
+                    {/* Only show BookingsCalendar if bookings data is available */}
+                    {!eventsLoading && events.length > 0 ? (<BookingsCalendar events={events.length > 0 ? events : allEvents} />) : (<p>Cargando calendario desde view</p>)}
+
+                  </>
+                )
+            }
           </div>
-        </div>     
+        </div>
       </div>
     </>
   )
