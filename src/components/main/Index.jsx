@@ -11,7 +11,7 @@ import { useDemoRouter } from "@toolpad/core/internal";
 
 // Importa tus componentes
 import Accomodations from "../accomodations/Accomodations";
-import Bookings from "../bookings/Bookings";
+import ViewBookings from "../bookings/ViewBookings";
 
 // Define la navegación sin tipos
 const demoTheme = createTheme({
@@ -53,7 +53,7 @@ function DemoPageContent({ pathname }) {
       {pathname === "/Alojamiento" ? (
         <Accomodations />
       ) : pathname === "/Reservaciones" ? (
-        <Bookings />
+        <ViewBookings />
       ) : (
         <Typography>Bienvenido a la página de inicio</Typography> // Opcional: mensaje por defecto
       )}

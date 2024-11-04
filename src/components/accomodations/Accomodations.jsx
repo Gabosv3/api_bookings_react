@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import { getAccomodations } from "../../services/accomodationServices";
+import { createAccommodation } from "../../services/accomodationServices";
 import Spinner from "react-bootstrap/Spinner";
 import "bootstrap/dist/css/bootstrap.min.css"; // Asegúrate de tener Bootstrap instalado
+import Swal from "sweetalert2"; //Importe sweetalert para mostrar la alerta cuando un nuevo alojamiento sea agregado o en caso que de error
 
 const Accomodations = () => {
   const [accomodations, setAccomodations] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  
   const fetchData = async () => {
     try {
       const response = await getAccomodations();
@@ -19,9 +21,14 @@ const Accomodations = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    const session_token = sessionStorage.getItem("token_bookings");
+  
+  const addAccommodation = (newAccommodation) => {
+    console.log("Añadiendo nuevo alojamiento:", newAccommodation);
+    setAccomodations((prev) => [...prev, newAccommodation]); // Agregamos el nuevo alojamiento al estado
+  };
+    
+    useEffect(() => {
+      const session_token = sessionStorage.getItem("token_bookings");
     if (session_token) {
       setIsAuthenticated(true);
       fetchData();
@@ -30,26 +37,27 @@ const Accomodations = () => {
       setLoading(false);
     }
   }, []);
-
+  
   return (
+  <>
+  <AccomodationsList
+  accomodations={accomodations}
+  isAuthenticated={isAuthenticated}
+  loading={loading}
+  onOpenModal={() => setIsModalOpen(true)}
+  />
+  {isModalOpen && (
     <>
-      <AccomodationsList
-        accomodations={accomodations}
-        isAuthenticated={isAuthenticated}
-        loading={loading}
-        onOpenModal={() => setIsModalOpen(true)}
-      />
-      {isModalOpen && (
-        <>
-          {/* Renderiza el backdrop */}
-          <div className="modal-backdrop fade show"></div>
-          <AccomodationsModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-          />
-        </>
-      )}
+    {/* Renderiza el backdrop */}
+    <div className="modal-backdrop fade show"></div>
+    <AccomodationsModal
+    isOpen={isModalOpen}
+    onClose={() => setIsModalOpen(false)}
+    onAddAccommodation={addAccommodation} // Pasamos la función al modal
+    />
     </>
+  )}
+  </>
   );
 };
 
@@ -98,9 +106,6 @@ const AccomodationsList = ({ accomodations, isAuthenticated, loading, onOpenModa
                     <button className="btn btn-primary mx-3">
                       <i className="bi bi-pencil-square"></i>
                     </button>
-                    <button className="btn btn-danger">
-                      <i className="bi bi-trash"></i>
-                    </button>
                   </div>
                 </div>
               </div>
@@ -112,7 +117,7 @@ const AccomodationsList = ({ accomodations, isAuthenticated, loading, onOpenModa
   );
 };
 
-const AccomodationsModal = ({ isOpen, onClose }) => {
+const AccomodationsModal = ({ isOpen, onClose, onAddAccommodation}) => {
   const [nombre, setNombre] = useState("");
   const [direccion, setDireccion] = useState("");
   const [descripcion, setDescripcion] = useState("");
@@ -122,10 +127,39 @@ const AccomodationsModal = ({ isOpen, onClose }) => {
     setImagen(e.target.files[0]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // Realiza la lógica para guardar los datos
-    onClose();
+    const newAccommodationData = {
+      name: nombre,
+      address: direccion,
+      description: descripcion,
+      //Podriamos agregar para guardar la imagen si fuese necesario, pero en este caso no 
+  };
+  try {
+    const newAccommodation = await createAccommodation(newAccommodationData);
+    if (newAccommodation) {
+        onAddAccommodation(newAccommodation); // Actualiza el listado
+        onClose(); // Cierra el modal
+        
+        // Muestra la alerta de éxito
+        Swal.fire({
+            icon: 'success',
+            title: '¡Éxito!',
+            text: 'El alojamiento ha sido guardado correctamente.',
+            confirmButtonText: 'Aceptar'
+        });
+    }
+} catch (error) {
+    console.error("Error al guardar el alojamiento:", error);
+    // Muestra la alerta de error
+    Swal.fire({
+        icon: 'error',
+        title: '¡Error!',
+        text: 'Hubo un problema al guardar el alojamiento.',
+        confirmButtonText: 'Aceptar'
+    });
+}
   };
 
   useEffect(() => {
