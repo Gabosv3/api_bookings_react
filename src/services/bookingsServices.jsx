@@ -1,11 +1,11 @@
 import axios from "axios";
 
 //obtenemos el token que se guarda en el sessionstorage
-const token = sessionStorage.getItem('token_bookings')
 
 const getBookings = async () => {
 
     try {
+      const token = sessionStorage.getItem('token_bookings')
 
         const response = await axios.get('https://apibookingsaccomodations-production.up.railway.app/api/V1/bookings',
             {
@@ -26,6 +26,8 @@ const getBookings = async () => {
 //Al cancelar una reservacion debemos actualizar su estado
 const updateStatusBooking = async (id) => {
     try {
+      const token = sessionStorage.getItem('token_bookings')
+
       const response = await axios.patch(
         `https://apibookingsaccomodations-production.up.railway.app/api/V1/status_booking/${id}`,
         { status: 'CANCELLED' },
@@ -55,6 +57,8 @@ const updateStatusBooking = async (id) => {
 const getBookingsByAccomodationId = async (id) => {
 
     try {
+      const token = sessionStorage.getItem('token_bookings')
+
 
         const response = await axios.get(`https://apibookingsaccomodations-production.up.railway.app/api/V1/bookings/calendar/${id}`,
             {
