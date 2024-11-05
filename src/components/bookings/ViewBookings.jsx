@@ -72,8 +72,6 @@ export default function ViewBookings() {
           };
         });
 
-        console.log("Probando direccion e imagen", eventFromBookings);
-
         setEvents(eventFromBookings)
         setAllEvents(eventFromBookings)
       } else {
