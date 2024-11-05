@@ -81,8 +81,8 @@ const CustomEventModal = ({ calendarEvent }) => {
       <Modal.Body>
         <Row>
           <Col xs={6}>
-            <p className="bg-info bg-opacity-25 rounded-pill p-1"><i class="bi bi-check-circle pe-2"></i>{calendarEvent.calendarId}</p>
-          </Col>
+            <p className={calendarEvent.calendarId==="CONFIRMED"?"bg-info bg-opacity-25 rounded-pill p-1":"bg-danger bg-opacity-25 rounded-pill p-1"}><i className="bi bi-check-circle pe-2"></i>{calendarEvent.calendarId}</p>
+          </Col> {/* bg-info bg-opacity-25 rounded-pill p-1 */}
           <Col xs={6}>
             <p className="text-end">ID: {calendarEvent.id}</p>
           </Col>
@@ -98,22 +98,22 @@ const CustomEventModal = ({ calendarEvent }) => {
         <Row className="py-3">
           <Col xs={12} md={6}>
             <p>Check-in</p>
-            <p><i class="bi bi-calendar-week pe-2 "></i>{formatDateLong(calendarEvent.start)}</p>
+            <p><i className="bi bi-calendar-week pe-2 "></i>{formatDateLong(calendarEvent.start)}</p>
           </Col>
           <Col xs={12} md={6}>
             <p>check-out</p>
-            <p><i class="bi bi-calendar-week pe-2 "></i>{formatDateLong(calendarEvent.end)}</p>
+            <p><i className="bi bi-calendar-week pe-2 "></i>{formatDateLong(calendarEvent.end)}</p>
           </Col>
         </Row>
         <Row>
           <Col xs={12}>
             <h4>Información del Huésped</h4>
-            <p><i class="bi bi-person-fill pe-2"></i>{calendarEvent.people}</p>
+            <p><i className="bi bi-person-fill pe-2"></i>{calendarEvent.people}</p>
           </Col>
           <Col xs={12}>
             <div className="bg-info bg-opacity-10 rounded p-2">
               <h4>Resumen de la Estancia</h4>
-              <p><i class="bi bi-moon-fill pe-2"></i>{calculateNights(calendarEvent.start, calendarEvent.end)} Noches</p>
+              <p><i className="bi bi-moon-fill pe-2"></i>{calculateNights(calendarEvent.start, calendarEvent.end)} Noches</p>
             </div>
           </Col>
         </Row>
@@ -122,7 +122,7 @@ const CustomEventModal = ({ calendarEvent }) => {
       <Modal.Footer>
         {/* Renderiza el botón de cancelar solo si el estado es "CONFIRM" */}
         {calendarEvent.calendarId === "CONFIRMED" && (
-          <Button variant="danger" onClick={handleCancelBooking}><i class="bi bi-slash-circle pe-2"></i>
+          <Button variant="danger" onClick={handleCancelBooking}><i className="bi bi-slash-circle pe-2"></i>
             Cancelar Reservación
           </Button>
         )}
