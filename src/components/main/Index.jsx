@@ -2,12 +2,14 @@ import * as React from "react";
 import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
 import { createTheme } from "@mui/material/styles";
 import EventIcon from "@mui/icons-material/Event";
 import AddHomeIcon from "@mui/icons-material/AddHome";
 import { AppProvider } from "@toolpad/core/AppProvider";
 import { DashboardLayout } from "@toolpad/core/DashboardLayout";
 import { useDemoRouter } from "@toolpad/core/internal";
+import { useNavigate } from "react-router-dom";  
 
 // Importa tus componentes
 import Accomodations from "../accomodations/Accomodations";
@@ -65,6 +67,7 @@ export default function DashboardLayoutNavigationActions(props) {
   const { window } = props;
   const router = useDemoRouter("/index");
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  const navigate = useNavigate();
 
   React.useEffect(() => {
     const session_token = sessionStorage.getItem("token_bookings");
@@ -75,6 +78,12 @@ export default function DashboardLayoutNavigationActions(props) {
     }
   }, []);
 
+  const handleLogout = () => {
+    
+    sessionStorage.removeItem("token_bookings");
+    setIsAuthenticated(false);
+    navigate("/login?status=logged-out");
+  };
 
   const demoWindow = window !== undefined ? window() : undefined;
 
@@ -106,6 +115,25 @@ export default function DashboardLayoutNavigationActions(props) {
       window={demoWindow}
     >
       <DashboardLayout>
+        {/* Botón de cerrar sesión */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            p: 2,
+          }}
+        >
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={handleLogout}
+          >
+            Cerrar Sesión
+          </Button>
+        </Box>
+
+        {/* Contenido dinámico basado en el pathname */}
         <DemoPageContent pathname={router.pathname} />
       </DashboardLayout>
     </AppProvider>

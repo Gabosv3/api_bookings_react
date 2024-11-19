@@ -14,8 +14,6 @@ const login = async (user) => {
     }
 }
 
-const logout = () => {
-    console.log("Has cerrado sesion");
-}
 
-export { login, logout }
+
+export { login }

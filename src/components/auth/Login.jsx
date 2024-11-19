@@ -1,13 +1,30 @@
+import  { useEffect } from "react";
 import { useForm } from 'react-hook-form';
-import { login } from '../../services/loginServices';
-import { useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2';
+import { useNavigate, useLocation } from 'react-router-dom';
+import Swal from "sweetalert2"; // Importar SweetAlert2
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../../assets/css/Login.css'; // Archivo CSS personalizado para agregar estilos adicionales
+import { login } from '../../services/loginServices';
 
 export default function Login() {
     const { register, handleSubmit, formState: { errors } } = useForm();
     const navigate = useNavigate();
+    const location = useLocation(); // Hook para obtener la ubicación
+
+    // Obtener el parámetro de la URL
+    const queryParams = new URLSearchParams(location.search);
+    const status = queryParams.get("status");
+
+    // Mostrar la alerta si la sesión se cerró
+    useEffect(() => {
+        if (status === "logged-out") {
+            Swal.fire({
+                icon: "success",
+                title: "Sesión cerrada",
+                text: "Tu sesión se ha cerrado correctamente.",
+            });
+        }
+    }, [status]); // Solo se ejecuta cuando el valor de status cambia
 
     // Mapa de correos con sus contraseñas y hashes predefinidos
     const usersData = {
